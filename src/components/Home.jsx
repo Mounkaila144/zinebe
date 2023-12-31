@@ -1,24 +1,42 @@
 
 import React, { useState, useEffect } from 'react';
 import CardList from './CardListe';
-import produitData from './data.json'; 
+import produitData from './data.json';
+import {Header} from "./Header.jsx";
 
-function Home({produits} ){
+function Home( ){
+    const [darkMode, setDarkMode] = useState(false);
 
+    // Charger et sauvegarder la préférence de mode
+    useEffect(() => {
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        setDarkMode(isDarkMode);
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('darkMode', darkMode);
+    }, [darkMode]);
+
+    // Fonction pour basculer le mode sombre
+    const toggleDarkMode = () => {
+        setDarkMode(!darkMode);
+    };
   
   const [recherche, setRecherche] = useState('');
   const [produitFiltres, setproduitFiltres] = useState([]);  
 
   useEffect(() => {
     const resultatsFiltres = produitData.filter(produit => 
-      produit.categoryName.toLowerCase().includes(recherche.toLowerCase())
+      produit.productName.toLowerCase().includes(recherche.toLowerCase())
     );
     setproduitFiltres(resultatsFiltres);
   }, [recherche]);
   
     return(
-        <div>
-       
+        <div className={darkMode ? 'dark' : ''}>
+            <div className="bg-white dark:bg-gray-800">
+
+       <Header toggleDarkMode={toggleDarkMode}  />
         <div className="container mx-auto p-4">
           <div className="flex gap-4 mb-4">
             <input 
@@ -32,6 +50,7 @@ function Home({produits} ){
           </div>
           <CardList produits={produitFiltres} />
         </div>
+      </div>
       </div>
 
  );
