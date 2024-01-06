@@ -1,55 +1,34 @@
 import React, {useState} from 'react';
 import zinebshop from './zinebshop.svg'
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
-
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userRole, setUserRole] = useState(null);
-
-    const users = {
-        admin: {
-            username: "admin",
-            password: "admin123",
-            nom: "Dupont",
-            prenom: "Jean",
-            adresse: "123 Rue de l'Admin",
-            role: "Administrateur",
-            telephone: "0102030405"
-        },
-        client: {
-            username: "client",
-            password: "client123",
-            nom: "Durand",
-            prenom: "Marie",
-            adresse: "456 Rue du Client",
-            role: "Client",
-            telephone: "0607080910"
-        }
-    };
     const navigate = useNavigate(); // Ajoutez cette ligne
 
-    const handleLogin = (username, password) => {
-        const user = Object.values(users).find(u => u.username === username && u.password === password);
-        if (user) {
-            setIsAuthenticated(true);
-            setUserRole(user.role);
-            // Redirection après la connexion
-            if (user.role === 'Administrateur') {
-                navigate('/admin');
-            } else {
-                navigate('/');
-            }
-        } else {
-            alert("Identifiants incorrects");
-        }
-    };
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        handleLogin(username, password);
+        try {
+            const response = await fetch('http://localhost:5000/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+            console.log(response)
+            if (response.ok) {
+                navigate('/');
+            } else {
+                alert(data.message || "Invalid credentials");
+            }
+        } catch (error) {
+            console.error("Login error", error);
+        }
     };
     return (
         <section className="bg-gray-50 dark:bg-gray-900">
@@ -106,9 +85,9 @@ const Login = () => {
                                 in
                             </button>
                             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                                Don’t have an account yet? <a href="#"
+                                Don’t have an account yet? <Link to="/register"
                                                               className="font-medium text-red-600 hover:underline dark:text-red-500">Sign
-                                up</a>
+                                up</Link>
                             </p>
                         </form>
                     </div>

@@ -1,58 +1,78 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import CardList from './CardListe';
-import produitData from './data.json';
-import {Header} from "./Header.jsx";
+import { Header } from "./Header.jsx";
 
-function Home( ){
-    const [darkMode, setDarkMode] = useState(false);
+function Home() {
+    const [categories, setCategories] = useState([]);
+    const [produits, setProduits] = useState([]);
+    const [categorie, setCategorie] = useState('');
+    const [recherche, setRecherche] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    // Charger et sauvegarder la préférence de mode
     useEffect(() => {
-        const isDarkMode = localStorage.getItem('darkMode') === 'true';
-        setDarkMode(isDarkMode);
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/categories');
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des catégories');
+                }
+                const categoriesData = await response.json();
+                setCategories(categoriesData);
+            } catch (error) {
+                setError('Erreur lors de la récupération des catégories');
+                console.error(error);
+            }
+        };
+
+        const fetchProduits = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/products');
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des produits');
+                }
+                const produitsData = await response.json();
+                setProduits(produitsData);
+            } catch (error) {
+                setError('Erreur lors de la récupération des produits');
+                console.error(error);
+            }
+        };
+
+        setLoading(true);
+        fetchCategories();
+        fetchProduits();
+        setLoading(false);
     }, []);
 
-    useEffect(() => {
-        localStorage.setItem('darkMode', darkMode);
-    }, [darkMode]);
+    const produitFiltres = useMemo(() => {
+        return produits.filter(produit =>
+            produit.name.toLowerCase().includes(recherche.toLowerCase()) &&
+            (categorie === '' || produit.category.name === categorie)
+        );
+    }, [recherche, categorie, produits]);
 
-    // Fonction pour basculer le mode sombre
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
-    };
-  
-  const [recherche, setRecherche] = useState('');
-  const [produitFiltres, setproduitFiltres] = useState([]);  
+    if (loading) return <div>Chargement...</div>;
+    if (error) return <div>Erreur : {error}</div>;
 
-  useEffect(() => {
-    const resultatsFiltres = produitData.filter(produit => 
-      produit.productName.toLowerCase().includes(recherche.toLowerCase())
-    );
-    setproduitFiltres(resultatsFiltres);
-  }, [recherche]);
-  
-    return(
-        <div className={darkMode ? 'dark' : ''}>
-            <div className="bg-white dark:bg-gray-800">
+    return (
+        <div className="bg-white dark:bg-gray-800">
+            <Header />
+            <div className="container mx-auto p-4 mt-20">
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                    <input
+                        className="flex-1 p-2 border rounded text-black"
+                        type='text'
+                        placeholder='Rechercher un produit'
+                        value={recherche}
+                        onChange={(e) => setRecherche(e.target.value)}
+                    />
 
-       <Header toggleDarkMode={toggleDarkMode}  />
-        <div className="container mx-auto p-4">
-          <div className="flex gap-4 mb-4">
-            <input 
-              className="flex-1 p-2 border rounded text-black"
-              type='text' 
-              placeholder='Rechercher un produits' 
-              value={recherche} 
-              onChange={(e) => setRecherche(e.target.value)} 
-            />
-           
-          </div>
-          <CardList produits={produitFiltres} />
+                </div>
+                <CardList produits={produitFiltres} />
+            </div>
         </div>
-      </div>
-      </div>
-
- );
+    );
 }
-    export default Home;
+
+export default Home;
