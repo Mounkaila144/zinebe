@@ -57,12 +57,12 @@ function App() {
                            element={<ProtectedRoute roleRequired="admin"><CategoryForm/></ProtectedRoute>}/>
                     <Route path="/category/edit/:categoryId" element={<ProtectedRoute ><CategoryForm /></ProtectedRoute>} />
 
-                    <Route path="/about" element={<About/>}/>
-                    <Route path="/contact" element={<Contact/> }/>
-                    <Route path="/pricing" element={<Pricing/> }/>
-                    <Route path="/service" element={<Service/> }/>
+                    <Route path="/about" element={<ProtectedRoute roleRequired="client"><About/></ProtectedRoute>}/>
+                    <Route path="/contact" element={<ProtectedRoute roleRequired="client"><Contact/> </ProtectedRoute>}/>
+                    <Route path="/pricing" element={<ProtectedRoute roleRequired="client"><Pricing/> </ProtectedRoute>}/>
+                    <Route path="/service" element={<ProtectedRoute roleRequired="client"><Service/> </ProtectedRoute>}/>
                     <Route path="/"
-                           element={<Home />}/>
+                           element={<ProtectedRoute roleRequired="client"><Home /></ProtectedRoute>}/>
                     <Route path="*" element={<Navigate to="/login"/>}/>
                 </Routes>
             </Router>
