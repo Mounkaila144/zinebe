@@ -1,29 +1,30 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import zinebshop from './zinebshop.svg'
 import {Link, useNavigate} from "react-router-dom";
+import {AuthContext} from "./AuthContext.jsx";
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-
-    const navigate = useNavigate(); // Ajoutez cette ligne
+    const { login } = useContext(AuthContext);
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await fetch('http://localhost:5000/api/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
             });
 
-            const data = await response.json();
-            console.log(response)
             if (response.ok) {
+                const data = await response.json(); // Obtenez les données JSON de la réponse
+                console.log(data.user); // Maintenant, vous pouvez accéder à `data.user`
+                login(data.user);
                 navigate('/');
             } else {
+                const data = await response.json();
                 alert(data.message || "Invalid credentials");
             }
         } catch (error) {

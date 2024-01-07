@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, {useState, useEffect, useMemo, useContext} from 'react';
 import CardList from './CardListe';
 import { Header } from "./Header.jsx";
+import {AuthContext} from "./AuthContext.jsx";
 
 function Home() {
     const [categories, setCategories] = useState([]);
@@ -9,6 +10,7 @@ function Home() {
     const [recherche, setRecherche] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -22,9 +24,16 @@ function Home() {
             } catch (error) {
                 setError('Erreur lors de la récupération des catégories');
                 console.error(error);
+            } finally {
+                setLoading(false);
             }
         };
 
+        setLoading(true);
+        fetchCategories();
+    }, []);
+
+    useEffect(() => {
         const fetchProduits = async () => {
             try {
                 const response = await fetch('http://localhost:5000/api/products');
@@ -39,10 +48,7 @@ function Home() {
             }
         };
 
-        setLoading(true);
-        fetchCategories();
         fetchProduits();
-        setLoading(false);
     }, []);
 
     const produitFiltres = useMemo(() => {
@@ -57,7 +63,6 @@ function Home() {
 
     return (
         <div className="bg-white dark:bg-gray-800">
-            <Header />
             <div className="container mx-auto p-4 mt-20">
                 <div className="grid grid-cols-4 gap-2 mb-4">
                     <input
@@ -67,7 +72,16 @@ function Home() {
                         value={recherche}
                         onChange={(e) => setRecherche(e.target.value)}
                     />
-
+                    <select
+                        className="p-2 border rounded text-black"
+                        value={categorie}
+                        onChange={(e) => setCategorie(e.target.value)}
+                    >
+                        <option value="">Toutes les catégories</option>
+                        {categories.map(categorie => (
+                            <option key={categorie?.name} value={categorie?.name}>{categorie?.name}</option>
+                        ))}
+                    </select>
                 </div>
                 <CardList produits={produitFiltres} />
             </div>

@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Modal from "./Modal.jsx";
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 const ProductForm = ({ onFormSubmit }) => {
     const [formData, setFormData] = useState({
@@ -10,8 +10,6 @@ const ProductForm = ({ onFormSubmit }) => {
         category: '',
         image: null
     });
-    const { categoryId } = useParams(); // Récupère le paramètre 'categoryId' de l'URL
-
     const [categories, setCategories] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 

@@ -2,50 +2,50 @@ import React, {useState, useEffect, useMemo} from 'react';
 import Modal from "./Modal.jsx";
 import {Link} from "react-router-dom";
 
-const ProductList = () => {
+const CategoryList = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [recherche, setRecherche] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     useEffect(() => {
 
-        const fetchProducts = async () => {
+        const fetchCategories = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/products');
+                const response = await fetch('http://localhost:5000/api/categories');
                 if (!response.ok) {
-                    throw new Error('Erreur lors de la récupération des products');
+                    throw new Error('Erreur lors de la récupération des categories');
                 }
-                const productsData = await response.json();
-                setProducts(productsData);
+                const categoriesData = await response.json();
+                setCategories(categoriesData);
             } catch (error) {
-                setError('Erreur lors de la récupération des products');
+                setError('Erreur lors de la récupération des categories');
                 console.error(error);
             }
         };
 
         setLoading(true);
-        fetchProducts();
+        fetchCategories();
         setLoading(false);
     }, []);
 
-    const produitFiltres = useMemo(() => {
-        return products.filter(produit =>
-            produit.name.toLowerCase().includes(recherche.toLowerCase()));
-    }, [recherche,products]);
+    const categoryFiltres = useMemo(() => {
+        return categories.filter(category =>
+            category.name.toLowerCase().includes(recherche.toLowerCase()));
+    }, [recherche,categories]);
 
     if (loading) return <div>Chargement...</div>;
     if (error) return <div>Erreur : {error}</div>;
 
-    const handleDelete = async (productId) => {
+    const handleDelete = async (categoryId) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+            const response = await fetch(`http://localhost:5000/api/categories/${categoryId}`, {
                 method: 'DELETE',
             });
 
             if (!response.ok) {
-                throw new Error('Erreur lors de la suppression du produit');
+                throw new Error('Erreur lors de la suppression du category');
             }else{
                 setIsModalOpen(true); // Ouvre le modal après la création réussie
                 setTimeout(() => {
@@ -53,8 +53,8 @@ const ProductList = () => {
                 }, 3000);
             }
 
-            // Mettre à jour l'état des products pour retirer le produit supprimé
-            setProducts(products.filter(product => product._id !== productId));
+            // Mettre à jour l'état des categories pour retirer le category supprimé
+            setCategories(categories.filter(category => category._id !== categoryId));
         } catch (error) {
             console.error('Erreur :', error);
         }
@@ -76,14 +76,14 @@ const ProductList = () => {
                     </svg>
                     <span className="sr-only">Info</span>
                     <div>
-                        <span className="font-medium">Success Remove!</span> Product.
+                        <span className="font-medium">Success Remove!</span> Category.
                     </div>
                 </div>
             </Modal>
 
             <div className="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 py-4 bg-white dark:bg-gray-900">
                 <div>
-                    <Link to='/product/creat' type="button" className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                    <Link to='/category/creat' type="button" className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
                         Ajouter
                     </Link>
                 </div>
@@ -101,19 +101,9 @@ const ProductList = () => {
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr >
-                    <th scope="col" className="px-6 py-3">
-                        Image
-                    </th>
+
                     <th scope="col" className="px-6 py-3">
                         name
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                        Description
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                        Price
-                    </th><th scope="col" className="px-6 py-3">
-                        Category
                     </th>
                     <th scope="col" className="px-6 py-3 text-center">
                         Action
@@ -121,29 +111,14 @@ const ProductList = () => {
                     </tr>
                 </thead>
                 <tbody>
-                {produitFiltres.map((product) => (
-                    <tr key={product._id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                    <td className="px-6 py-4 font-semibold">
-                        <img src={`http://localhost:5000/${product.image}`} className=" max-w-28 max-h-28" alt="Apple Watch"/>
-                    </td>
+                {categoryFiltres.map((category) => (
+                    <tr key={category._id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                     <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                        {product.name}
-                    </td>
-                    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                        {product.description}
-                    </td>
-
-                    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                    {product.price} Dt
-                    </td>
-
-                    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                        {product.category?.name ? `${product.category.name} Dt` : 'Catégorie non spécifiée'}
+                        {category.name}
                     </td>
 
                     <td className="px-6 py-4 text-center">
-                        <button onClick={() => handleDelete(product._id)} type="button" className="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Remove</button>
-
+                        <button onClick={() => handleDelete(category._id)} type="button" className="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Remove</button>
 
                     </td>
                 </tr>
@@ -156,4 +131,4 @@ const ProductList = () => {
     );
 };
 
-export default ProductList;
+export default CategoryList;

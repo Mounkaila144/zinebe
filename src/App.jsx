@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {BrowserRouter as Router, Routes, Route, Navigate, useNavigate} from 'react-router-dom';
 import Login from "./components/login.jsx";
 import AdminPage from "./components/AdminPage.jsx";
@@ -12,10 +12,14 @@ import Register from "./components/register.jsx";
 import ProductForm from "./components/ProductForm.jsx";
 import CategoryForm from "./components/categoryForm.jsx";
 import ProductList from "./components/ProductList.jsx";
+import CategoryList from "./components/CategoryList.jsx";
+import {AuthProvider} from "./components/AuthContext.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 
 function App() {
     const [darkMode, setDarkMode] = useState(false);
+
 
     useEffect(() => {
         if (darkMode) {
@@ -30,31 +34,40 @@ function App() {
         const storedDarkMode = localStorage.getItem('darkMode') === 'true';
         setDarkMode(storedDarkMode);
     }, []);
-
     const toggleDarkMode = () => {
         setDarkMode(!darkMode);
     };
-  return (
 
-    <Router>
-        <Header toggleDarkMode={toggleDarkMode} />
+    return (
+        <AuthProvider>
 
-        <Routes>
-          <Route path="/login" element={<Login  />} />
-          <Route path="/register" element={<Register /> } />
-          <Route path="/product/creat" element={<ProductForm /> } />
-          <Route path="/product" element={<ProductList /> } />
-          <Route path="/category/creat" element={<CategoryForm /> } />
-          <Route path="/about" element={<About /> } />
-          <Route path="/contact" element={<Contact /> } />
-          <Route path="/pricing" element={<Pricing /> } />
-          <Route path="/service" element={<Service /> } />
-          <Route path="/admin" element={<AdminPage />} />
-            <Route path="/" element={<Home darkMode={darkMode} /> } />
-          <Route path="*" element={ <Navigate to="/login" />} />
-        </Routes>
-      </Router>
-  );
+            <Router>
+                <Header toggleDarkMode={toggleDarkMode}/>
+
+                <Routes>
+                    <Route path="/login" element={<Login/>}/>
+                    <Route path="/register" element={<Register/>}/>
+                    <Route path="/product/creat"
+                           element={<ProtectedRoute roleRequired="admin"><ProductForm/></ProtectedRoute>}/>
+                    <Route path="/product"
+                           element={<ProtectedRoute roleRequired="admin"><ProductList/></ProtectedRoute>}/>
+                    <Route path="/category"
+                           element={<ProtectedRoute roleRequired="admin"><CategoryList/></ProtectedRoute>}/>
+                    <Route path="/category/creat"
+                           element={<ProtectedRoute roleRequired="admin"><CategoryForm/></ProtectedRoute>}/>
+                    <Route path="/category/edit/:categoryId" element={<ProtectedRoute ><CategoryForm /></ProtectedRoute>} />
+
+                    <Route path="/about" element={<ProtectedRoute ><About/></ProtectedRoute>}/>
+                    <Route path="/contact" element={<ProtectedRoute ><Contact/> </ProtectedRoute>}/>
+                    <Route path="/pricing" element={<ProtectedRoute ><Pricing/> </ProtectedRoute>}/>
+                    <Route path="/service" element={<ProtectedRoute ><Service/> </ProtectedRoute>}/>
+                    <Route path="/"
+                           element={<ProtectedRoute><Home /></ProtectedRoute>}/>
+                    <Route path="*" element={<Navigate to="/login"/>}/>
+                </Routes>
+            </Router>
+        </AuthProvider>
+    );
 }
 
 export default App;

@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 exports.register = async (req, res) => {
     try {
         const { username, password ,name,lastname } = req.body;
-        const user = new User({  username, password ,name,lastname});
+        const user = new User({  username, password ,name,lastname,role:'client'});
         await user.save();
         res.status(201).json({ message: 'Utilisateur créé !' });
     } catch (error) {
@@ -28,8 +28,23 @@ exports.login = async (req, res) => {
             { expiresIn: '24h' }
         );
 
-        res.status(200).json({ userId: user._id, token });
+        // Ajoutez les informations nécessaires de l'utilisateur dans la réponse
+        // Assurez-vous de ne pas renvoyer le mot de passe ou d'autres informations sensibles
+        const userForResponse = {
+            username: user.username,
+            name: user.name,
+            role: user.role,
+            lastname: user.lastname,
+            // autres champs selon les besoins
+        };
+
+        res.status(200).json({
+            userId: user._id,
+            token,
+            user: userForResponse // Envoyez ces informations à l'application frontale
+        });
     } catch (error) {
         res.status(500).json({ error });
     }
 };
+
